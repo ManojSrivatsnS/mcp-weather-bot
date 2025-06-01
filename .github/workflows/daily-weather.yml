@@ -1,27 +1,25 @@
-name: Daily Weather Email
+name: 🌤️ Daily Weather Email Bot
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # Every 15 minutes
-  workflow_dispatch:        # Allows manual trigger
+    - cron: '5 * * * *'  # Every hour at minute 5 (we filter inside script)
+  workflow_dispatch:    # Allows manual runs
 
 jobs:
-  send_weather:
+  weather_job:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
 
-    - name: Install Dependencies
+    - name: Install dependencies
       run: |
+        python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run Weather Job
-      run: |
-        python run_once.py
+    - name: Run scheduler
+      run: python run_once.py
