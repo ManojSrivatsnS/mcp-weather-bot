@@ -103,5 +103,4 @@ def unsubscribe():
     save_users(users)
     return f"✅ You have been unsubscribed."
 
-app.run(port=5000)
-
+app.run(host="0.0.0.0", port=5000)
