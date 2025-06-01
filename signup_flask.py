@@ -11,16 +11,6 @@ Original file is located at
 
 #!pip install flask flask-ngrok geopy timezonefinder pyngrok
 
-"""# Set Up ngrok Auth Token (only once per session)"""
-
-from pyngrok import conf, ngrok
-
-conf.get_default().auth_token = "2xsD8benpYavdhmCKit9aERC4Yw_3bFWCe3s6Bvx2M12verSh"
-
-"""# Start ngrok tunnel manually"""
-
-public_url = ngrok.connect(5000)
-print("🚀 Your public URL:", public_url)
 
 """# Step 1B: Flask Web Interface (Sign-Up and Unsubscribe)"""
 
