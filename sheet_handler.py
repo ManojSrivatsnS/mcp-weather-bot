@@ -1,5 +1,7 @@
 # sheet_handler.py
-
+import os
+import json
+from io import StringIO
 import gspread
 from google.oauth2.service_account import Credentials
 
@@ -15,7 +17,9 @@ SCOPE = ["https://www.googleapis.com/auth/spreadsheets",
 
 # Authenticate with service account JSON
 def connect_to_sheet():
-    creds = Credentials.from_service_account_file("sheet-writer.json", scopes=SCOPE)
+   # creds = Credentials.from_service_account_file("sheet-writer.json", scopes=SCOPE)
+    creds_dict = json.loads(os.getenv("GOOGLE_CREDS_JSON"))
+    creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPE)
     client = gspread.authorize(creds)
     sheet = client.open(SHEET_NAME).sheet1
     return sheet
