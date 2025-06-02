@@ -19,6 +19,7 @@ import json
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 import os
+from sheet_handler import add_user_to_sheet, remove_user_from_sheet
 
 app = Flask(__name__)
 geolocator = Nominatim(user_agent="mcp_weather_signup")
