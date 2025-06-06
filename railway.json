@@ -1,7 +1,6 @@
 {
   "build": {
-    "builder": "NIXPACKS",
-    "nixpacksConfigPath": "nixpacks.toml"
+    "builder": "NIXPACKS"
   },
   "deploy": {
     "startCommand": "python signup_flask.py"
