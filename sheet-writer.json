@@ -1,0 +1,9 @@
+{
+  "type": "service_account",
+  "project_id": "my-weather-bot",
+  "private_key_id": "abc123abc123abc123abc123abc123abc123",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEv...==\n-----END PRIVATE KEY-----\n",
+  "client_email": "my-bot@my-weather-bot.iam.gserviceaccount.com",
+  "client_id": "1234567890",
+  ...
+}
