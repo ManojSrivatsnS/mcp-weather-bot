@@ -1,10 +1,8 @@
-import os
-
-workflow_content = f"""name: ⏰ Daily Weather Mailer
+name: ⏰ Daily Weather Mailer
 
 on:
   schedule:
-    - cron: "*/30 * * * *"  # Every 30 minutes
+    - cron: "0 5 * * *"  # Every day at 5:00 AM UTC
   workflow_dispatch:
 
 jobs:
@@ -24,21 +22,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Set GOOGLE_CREDS_JSON secret
-        run: echo '${{{{ secrets.GOOGLE_CREDS_JSON }}}}' > creds.json
+      - name: Create credentials file
+        run: |
+          echo "${{ secrets.GOOGLE_CREDS_JSON }}" > creds.json
 
       - name: Run the weather scheduler
         env:
-          GOOGLE_CREDS_JSON: ${{{{ secrets.GOOGLE_CREDS_JSON }}}}
+          GOOGLE_CREDS_JSON: ${{ secrets.GOOGLE_CREDS_JSON }}
         run: python run_once.py
-"""
-
-# Save the workflow file content
-workflow_dir = "/mnt/data/.github/workflows"
-os.makedirs(workflow_dir, exist_ok=True)
-workflow_file = os.path.join(workflow_dir, "daily-weather.yml")
-
-with open(workflow_file, "w") as f:
-    f.write(workflow_content)
-
-workflow_file
