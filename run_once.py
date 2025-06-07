@@ -14,13 +14,31 @@ import pytz
 
 from weatherer import get_weather
 from mailerer import send_email
+from sheet_handler import connect_to_sheet
 
-USER_FILE = "users.json"
+#USER_FILE = "users.json"
+
+#def load_users():
+#    with open(USER_FILE, "r") as f:
+#        return json.load(f)
 
 def load_users():
-    with open(USER_FILE, "r") as f:
-        return json.load(f)
+    sheet = connect_to_sheet()
+    data = sheet.get_all_values()
+    headers = data[0]
+    users = []
 
+    for row in data[1:]:
+        user = dict(zip(headers, row))
+        users.append({
+            "name": user.get("name"),
+            "email": user.get("email"),
+            "city": user.get("city"),
+            "location": user.get("location"),
+            "timezone": user.get("timezone")
+        })
+
+    return users
 def is_near_7am(timezone_str):
     now = datetime.now(pytz.timezone(timezone_str))
     #return now.hour == 5 and now.minute <= 5  # e.g., between 7:00 and 7:05 AM
