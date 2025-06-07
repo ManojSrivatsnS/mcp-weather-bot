@@ -25,13 +25,9 @@ def get_weather(location_coords):
         data = response.json()
         values = data.get("data", {}).get("values", {})
 
-        report = (
-            f"Temperature: {values.get('temperature')}°C\\n"
-            f"Humidity: {values.get('humidity')}%\\n"
-            f"Wind Speed: {values.get('windSpeed')} m/s\\n"
-            f"Cloud Cover: {values.get('cloudCover')}%\\n"
-            f"Precipitation: {values.get('precipitationIntensity')} mm/hr"
-        )
+        report_lines = [f"{key}: {val}" for key, val in values.items()]
+        report = "\n".join(report_lines)
         return report
+        
     except Exception as e:
         return f"❌ Failed to fetch weather: {str(e)}"
