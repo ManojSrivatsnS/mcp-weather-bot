@@ -12,6 +12,71 @@ import json
 
 API_KEY = "O3Y0uuV95WXcPA7x5QsYwgm0RruivSxm"
 
+# Optional: Map weather codes to human-readable conditions
+WEATHER_CODES = {
+    1000: "☀️ Clear",
+    1001: "☁️ Cloudy",
+    1100: "🌤️ Mostly Clear",
+    1101: "⛅ Partly Cloudy",
+    1102: "🌥️ Mostly Cloudy",
+    2000: "🌫️ Fog",
+    2100: "🌫️ Light Fog",
+    4000: "🌧️ Drizzle",
+    4001: "🌧️ Rain",
+    4200: "🌦️ Light Rain",
+    4201: "🌧️ Heavy Rain",
+    5000: "❄️ Snow",
+    5001: "❄️ Flurries",
+    5100: "🌨️ Light Snow",
+    5101: "🌨️ Heavy Snow",
+    6000: "🌨️ Freezing Drizzle",
+    6001: "🌨️ Freezing Rain",
+    6200: "🌨️ Light Freezing Rain",
+    6201: "🌨️ Heavy Freezing Rain",
+    7000: "🌨️ Ice Pellets",
+    7101: "🌨️ Heavy Ice Pellets",
+    7102: "🌨️ Light Ice Pellets",
+    8000: "⛈️ Thunderstorm"
+}
+
+def format_weather(values):
+    mapping = {
+        "temperature": ("🌡️ Temperature", "°C"),
+        "temperatureApparent": ("🥵 Feels Like", "°C"),
+        "humidity": ("💧 Humidity", "%"),
+        "dewPoint": ("🧊 Dew Point", "°C"),
+        "windSpeed": ("🍃 Wind Speed", "m/s"),
+        "windGust": ("💨 Wind Gust", "m/s"),
+        "windDirection": ("🧭 Wind Direction", "°"),
+        "cloudCover": ("☁️ Cloud Cover", "%"),
+        "cloudBase": ("☁️ Cloud Base", "km"),
+        "cloudCeiling": ("☁️ Cloud Ceiling", "km"),
+        "uvIndex": ("🔆 UV Index", ""),
+        "uvHealthConcern": ("⚠️ UV Health Risk", ""),
+        "visibility": ("👀 Visibility", "km"),
+        "precipitationProbability": ("🌧️ Rain Chance", "%"),
+        "rainIntensity": ("🌧️ Rain Intensity", "mm/hr"),
+        "sleetIntensity": ("🌨️ Sleet Intensity", "mm/hr"),
+        "snowIntensity": ("❄️ Snow Intensity", "mm/hr"),
+        "freezingRainIntensity": ("🌨️ Freezing Rain", "mm/hr"),
+        "pressureSeaLevel": ("📉 Sea Pressure", "hPa"),
+        "pressureSurfaceLevel": ("📈 Surface Pressure", "hPa"),
+        "weatherCode": ("🧾 Weather Code", ""),
+    }
+
+    lines = []
+    for key, (label, unit) in mapping.items():
+        val = values.get(key)
+        if val is not None:
+            # Special handling for weatherCode
+            if key == "weatherCode":
+                desc = WEATHER_CODES.get(val, f"Code {val}")
+                lines.append(f"{label}: {desc}")
+            else:
+                lines.append(f"{label}: {val} {unit}".strip())
+    return "\n".join(lines)
+
+
 def get_weather(location_coords):
     '''
     location_coords: string in format "lat,lon"
@@ -24,10 +89,7 @@ def get_weather(location_coords):
         response.raise_for_status()
         data = response.json()
         values = data.get("data", {}).get("values", {})
-
-        report_lines = [f"{key}: {val}" for key, val in values.items()]
-        report = "\n".join(report_lines)
-        return report
+        return format_weather(values)
         
     except Exception as e:
         return f"❌ Failed to fetch weather: {str(e)}"
