@@ -29,36 +29,54 @@ def load_users():
     users = []
 
     for row in data[1:]:
+        if not any(row):  # skip blank rows
+            continue
         user = dict(zip(headers, row))
         users.append({
-            "name": user.get("name"),
-            "email": user.get("email"),
-            "city": user.get("city"),
-            "location": user.get("location"),
-            "timezone": user.get("timezone")
+            "name": user.get("name", "").strip(),
+            "email": user.get("email", "").strip(),
+            "city": user.get("city", "").strip(),
+            "location": user.get("location", "").strip(),
+            "timezone": user.get("timezone", "").strip()
         })
 
     return users
-def is_near_7am(timezone_str):
-    now = datetime.now(pytz.timezone(timezone_str))
-    return now.hour == 7 and now.minute <= 5  # e.g., between 7:00 and 7:05 AM
-    #return now.hour == 21 and now.minute <= 10  # e.g., between 7:00 and 7:05 AM
-    #return True
 
+def is_near_7am(timezone_str):
+    try:
+        now = datetime.now(pytz.timezone(timezone_str))
+        return now.hour == 7 and now.minute < 5
+        #return now.hour == 21 and now.minute <= 10  # e.g., between 7:00 and 7:05 AM
+        #return True
+    except Exception as e:
+        print(f"⚠️ Invalid timezone '{timezone_str}': {e}")
+        return False
+        
 def run_scheduler_once():
-    print("⏰ Running single-pass scheduler...")
+    print("⏰ Running weather mailer scheduler...")
+
     users = load_users()
+    print(f"📋 Loaded {len(users)} users from sheet.")
 
     for user in users:
+        email = user.get("email")
+        city = user.get("city")
+        location = user.get("location")
+        timezone = user.get("timezone")
+
+        if not all([email, location, timezone]):
+            print(f"⚠️ Skipping incomplete user: {user}")
+            continue
+
         try:
-            if is_near_7am(user["timezone"]):
-                print(f"📩 Sending weather to {user['email']} ({user['city']})")
-                weather = get_weather(user["location"])
-                send_email(user["email"], weather, user["city"])
+            if is_near_7am(timezone):
+                print(f"📩 Sending weather to {email} ({city})")
+                weather = get_weather(location)
+                send_email(email, weather, city)
             else:
-                print(f"⏳ Skipping {user['email']} — not near 7 AM in {user['timezone']}")
+                print(f"⏳ Skipping {email} — not 7 AM in {timezone}")
         except Exception as e:
-            print(f"❌ Error processing {user['email']}: {e}")
+            print(f"❌ Error processing {email}: {e}")
 
-run_scheduler_once()
-
+if __name__ == "__main__":
+    run_scheduler_once()
