@@ -45,9 +45,9 @@ def load_users():
 def is_near_7am(timezone_str):
     try:
         now = datetime.now(pytz.timezone(timezone_str))
-        #return now.hour == 7 and now.minute < 5
+        return now.hour == 7 and now.minute < 5
         #return now.hour == 21 and now.minute <= 10  # e.g., between 7:00 and 7:05 AM
-        return True
+        #return True
     except Exception as e:
         print(f"⚠️ Invalid timezone '{timezone_str}': {e}")
         return False
