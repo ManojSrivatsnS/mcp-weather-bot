@@ -37,10 +37,30 @@ def load_users():
             "email": user.get("email", "").strip(),
             "city": user.get("city", "").strip(),
             "location": user.get("location", "").strip(),
-            "timezone": user.get("timezone", "").strip()
+            "timezone": user.get("timezone", "").strip(),
+            "last_sent_date": user.get("last_sent_date", "").strip() if "last_sent_date" in user else ""
         })
 
     return users
+
+def is_within_window(timezone_str):
+    """
+    Check if local time is between 6:30 and 7:30 AM.
+    """
+    try:
+        now = datetime.now(pytz.timezone(timezone_str))
+        return (now.hour == 6 and now.minute >= 30) or (now.hour == 7 and now.minute <= 30)
+    except Exception as e:
+        print(f"⚠️ Invalid timezone '{timezone_str}': {e}")
+        return False
+
+def update_last_sent_date(email):
+    sheet = connect_to_sheet()
+    all_data = sheet.get_all_values()
+    for idx, row in enumerate(all_data[1:], start=2):
+        if row[1].strip().lower() == email.lower():
+            sheet.update_cell(idx, 6, datetime.utcnow().strftime("%Y-%m-%d"))  # assuming last_sent_date is 6th col
+            break
 
 def is_near_7am(timezone_str):
     try:
@@ -55,8 +75,8 @@ def is_near_7am(timezone_str):
         
 def run_scheduler_once():
     print("⏰ Running weather mailer scheduler...")
-
     users = load_users()
+    today_str = datetime.utcnow().strftime("%Y-%m-%d")
     print(f"📋 Loaded {len(users)} users from sheet.")
 
     for user in users:
@@ -64,18 +84,23 @@ def run_scheduler_once():
         city = user.get("city")
         location = user.get("location")
         timezone = user.get("timezone")
+        last_sent = user.get("last_sent_date", "")
 
         if not all([email, location, timezone]):
             print(f"⚠️ Skipping incomplete user: {user}")
             continue
 
         try:
-            if is_near_7am(timezone):
-                print(f"📩 Sending weather to {email} ({city})")
-                weather = get_weather(location)
-                send_email(email, weather, city)
+            if is_within_window(timezone):
+                if last_sent != today_str:
+                    print(f"📩 Sending weather to {email} ({city})")
+                    weather = get_weather(location)
+                    send_email(email, weather, city)
+                    update_last_sent_date(email)
+                else:
+                    print(f"✅ Already sent to {email} today, skipping.")
             else:
-                print(f"⏳ Skipping {email} — not 7 AM in {timezone}")
+                print(f"⏳ Skipping {email} — not near 7AM window in {timezone}")
         except Exception as e:
             print(f"❌ Error processing {email}: {e}")
 
